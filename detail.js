@@ -7,7 +7,7 @@ const judulDicari = paramUrl.get('judul');
 let infoSeriAktif = {
     id: null,
     judul: judulDicari || "Memuat Judul...",
-    poster: "https://via.placeholder.com/200x280?text=No+Image",
+    poster: "https://via.placeholder.com/200x280/1b1726/a88beb?text=DecaStream",
     tahun: "TBA",
     youtubeKeyBawaan: null
 };
@@ -18,19 +18,63 @@ let statusPutar = {
     server: 1
 };
 
-let daftarEpisodeAktif = []; // Menyimpan daftar episode season yang sedang dibuka untuk mode Marathon
-
+let daftarEpisodeAktif = [];
 const videoMp4Default = "https://www.w3schools.com/html/mov_bbb.mp4";
 
-function dapatkanSumberVideo(judul, season, episode) {
-    const db = (typeof databaseEpisode !== 'undefined') ? databaseEpisode : {};
-    if (db[judul] && db[judul][season] && db[judul][season][episode]) {
-        return db[judul][season][episode];
+// --- 1. PENGOLAH LINK OTOMATIS (YOUTUBE & GOOGLE DRIVE) ---
+function formatLinkOtomatis(url) {
+    if (!url || typeof url !== 'string') return null;
+    const linkBersih = url.trim();
+
+    // YouTube (watch?v=..., youtu.be/..., shorts/...)
+    if (linkBersih.includes('youtube.com/watch')) {
+        try {
+            const videoId = new URL(linkBersih).searchParams.get('v');
+            return videoId ? `https://www.youtube.com/embed/${videoId}` : linkBersih;
+        } catch {
+            return linkBersih;
+        }
     }
-    return null;
+    if (linkBersih.includes('youtu.be/')) {
+        const videoId = linkBersih.split('youtu.be/')[1].split(/[?&]/)[0];
+        return `https://www.youtube.com/embed/${videoId}`;
+    }
+    if (linkBersih.includes('youtube.com/shorts/')) {
+        const videoId = linkBersih.split('youtube.com/shorts/')[1].split(/[?&]/)[0];
+        return `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    // Google Drive (.../file/d/ID_FILE/...)
+    if (linkBersih.includes('drive.google.com/file/d/')) {
+        const match = linkBersih.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+        return match ? `https://drive.google.com/file/d/${match[1]}/preview` : linkBersih;
+    }
+
+    return linkBersih;
 }
 
-// --- 1. FUNGSI PEMUTAR VIDEO ---
+// Mencari data seri di episodes.js tanpa mempedulikan huruf besar/kecil
+function cariSeriDiDatabase(judul) {
+    const db = (typeof databaseEpisode !== 'undefined') ? databaseEpisode : {};
+    const kunciCocok = Object.keys(db).find(
+        k => k.trim().toLowerCase() === judul.trim().toLowerCase()
+    );
+    return kunciCocok ? db[kunciCocok] : null;
+}
+
+function dapatkanSumberVideo(judul, season, episode) {
+    const dataSeri = cariSeriDiDatabase(judul);
+    if (!dataSeri || !dataSeri[season]) return null;
+
+    const dataSeason = dataSeri[season];
+    const linkMentah = Array.isArray(dataSeason)
+        ? dataSeason[episode - 1]
+        : dataSeason[episode];
+
+    return formatLinkOtomatis(linkMentah);
+}
+
+// --- 2. FUNGSI PEMUTAR VIDEO ---
 function muatPemutarVideo() {
     const wadahPemutar = document.querySelector('.pemutar-video');
     if (!wadahPemutar) return;
@@ -116,7 +160,7 @@ function tampilkanAnimasiLompat(teks) {
     setTimeout(() => infoJump.remove(), 500);
 }
 
-// --- 2. KONTROL MARATHON (PREV/NEXT EPISODE) & PEMILIH SERVER ---
+// --- 3. KONTROL MARATHON & PEMILIH SERVER ---
 function pasangKontrolPemutar() {
     if (document.getElementById('wadah-kontrol-pemutar')) return;
 
@@ -138,7 +182,6 @@ function pasangKontrolPemutar() {
 
     wadahPemutar.insertAdjacentElement('afterend', kontrolWrapper);
 
-    // Event tombol server
     document.querySelectorAll('.btn-server').forEach(btn => {
         btn.onclick = () => {
             statusPutar.server = parseInt(btn.getAttribute('data-server'));
@@ -152,17 +195,12 @@ function pasangKontrolPemutar() {
         };
     });
 
-    // Event tombol Marathon
     document.getElementById('btn-prev-eps').onclick = () => {
-        if (statusPutar.episode > 1) {
-            pilihDanPutarEpisode(statusPutar.episode - 1);
-        }
+        if (statusPutar.episode > 1) pilihDanPutarEpisode(statusPutar.episode - 1);
     };
 
     document.getElementById('btn-next-eps').onclick = () => {
-        if (statusPutar.episode < daftarEpisodeAktif.length) {
-            pilihDanPutarEpisode(statusPutar.episode + 1);
-        }
+        if (statusPutar.episode < daftarEpisodeAktif.length) pilihDanPutarEpisode(statusPutar.episode + 1);
     };
 }
 
@@ -181,7 +219,6 @@ function pilihDanPutarEpisode(nomorEpisode) {
 
     statusPutar.episode = nomorEpisode;
 
-    // Sorot tombol episode yang dipilih
     document.querySelectorAll('.tombol-eps').forEach(btn => {
         const isTerpilih = parseInt(btn.getAttribute('data-eps')) === nomorEpisode;
         btn.style.backgroundColor = isTerpilih ? '#a88beb' : '#241e33';
@@ -205,14 +242,18 @@ function pilihDanPutarEpisode(nomorEpisode) {
 pasangKontrolPemutar();
 muatPemutarVideo();
 
-// --- 3. MENGAMBIL DATA SERI & SEASON DARI TMDB ---
+// --- 4. MENGAMBIL DATA SERI & SEASON DARI TMDB ---
 if (judulDicari) {
     document.getElementById('judul-detail').innerText = judulDicari;
     ambilDetailFilm(judulDicari);
 }
 
 async function ambilDetailFilm(judul) {
-    if (TMDB_API_KEY === 'MASUKKAN_API_KEY_ANDA_DI_SINI') return;
+    if (TMDB_API_KEY === 'MASUKKAN_API_KEY_ANDA_DI_SINI') {
+        pasangTombolBookmark();
+        muatEpisodeDariDatabaseLokal();
+        return;
+    }
 
     try {
         const responCari = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(judul)}`);
@@ -247,13 +288,22 @@ async function ambilDetailFilm(judul) {
 
             pasangTombolBookmark();
             siapkanWadahEpisode(dataDetail.seasons || []);
+        } else {
+            // Fallback jika seri tidak ada di TMDB, ambil episode dari episodes.js
+            document.getElementById('kategori-detail').innerText = "Tokusatsu / Series";
+            document.getElementById('tahun-detail').innerText = "2026";
+            document.querySelector('.info-film p:last-child').innerHTML = `<strong>Sinopsis:</strong> Tayangan tersedia di DecaStream.`;
+            pasangTombolBookmark();
+            muatEpisodeDariDatabaseLokal();
         }
     } catch (error) {
         console.error("Gagal mengambil detail:", error);
+        pasangTombolBookmark();
+        muatEpisodeDariDatabaseLokal();
     }
 }
 
-// --- 4. FITUR BOOKMARK ---
+// --- 5. FITUR BOOKMARK ---
 function pasangTombolBookmark() {
     if (document.getElementById('btn-bookmark')) return;
 
@@ -280,11 +330,8 @@ function pasangTombolBookmark() {
         let daftarBookmark = JSON.parse(localStorage.getItem('playsatsu_bookmark')) || [];
         const indeks = daftarBookmark.findIndex(item => item.judul === infoSeriAktif.judul);
 
-        if (indeks > -1) {
-            daftarBookmark.splice(indeks, 1);
-        } else {
-            daftarBookmark.unshift(infoSeriAktif);
-        }
+        if (indeks > -1) daftarBookmark.splice(indeks, 1);
+        else daftarBookmark.unshift(infoSeriAktif);
 
         localStorage.setItem('playsatsu_bookmark', JSON.stringify(daftarBookmark));
         perbaruiTampilanTombol();
@@ -294,7 +341,7 @@ function pasangTombolBookmark() {
     document.getElementById('judul-detail').insertAdjacentElement('afterend', btnBookmark);
 }
 
-// --- 5. CATAT OTOMATIS KE HISTORY ---
+// --- 6. CATAT OTOMATIS KE HISTORY ---
 function catatKeHistory(nomorSeason, nomorEpisode) {
     let daftarHistory = JSON.parse(localStorage.getItem('playsatsu_history')) || [];
     daftarHistory = daftarHistory.filter(item => item.judul !== infoSeriAktif.judul);
@@ -309,7 +356,7 @@ function catatKeHistory(nomorSeason, nomorEpisode) {
     localStorage.setItem('playsatsu_history', JSON.stringify(daftarHistory.slice(0, 20)));
 }
 
-// --- 6. SEASON SELECTOR & DAFTAR EPISODE ---
+// --- 7. SEASON SELECTOR & DAFTAR EPISODE ---
 function siapkanWadahEpisode(daftarSeasons) {
     const infoFilmDiv = document.querySelector('.info-film');
     if (document.getElementById('wadah-kontrol-episode')) return;
@@ -388,15 +435,62 @@ async function muatEpisodePerSeason(idFilm, nomorSeason) {
                 tombol.style.cssText = `padding: 8px 15px; background-color: ${isPertama ? '#a88beb' : '#241e33'}; color: ${isPertama ? '#121018' : 'white'}; font-weight: ${isPertama ? 'bold' : 'normal'}; border: none; border-radius: 5px; cursor: pointer; transition: 0.2s;`;
 
                 tombol.onclick = () => pilihDanPutarEpisode(eps.episode_number);
-
                 gridEpisode.appendChild(tombol);
             });
         } else {
-            gridEpisode.innerHTML = '<p>Daftar episode tidak ditemukan untuk season ini.</p>';
-            perbaruiTombolMarathon();
+            muatEpisodeDariDatabaseLokal();
         }
     } catch (error) {
         console.error("Gagal memuat episode season:", error);
-        gridEpisode.innerHTML = '<p>Gagal memuat daftar episode.</p>';
+        muatEpisodeDariDatabaseLokal();
     }
+}
+
+// Fallback pembuat tombol episode langsung dari episodes.js jika TMDB tidak memiliki datanya
+function muatEpisodeDariDatabaseLokal() {
+    const dataSeri = cariSeriDiDatabase(infoSeriAktif.judul);
+    if (!dataSeri || !dataSeri[1]) return;
+
+    const daftarLink = Array.isArray(dataSeri[1]) ? dataSeri[1] : Object.values(dataSeri[1]);
+    daftarEpisodeAktif = daftarLink.map((_, i) => ({
+        episode_number: i + 1,
+        name: `Episode ${i + 1}`
+    }));
+
+    const infoFilmDiv = document.querySelector('.info-film');
+    if (!document.getElementById('wadah-kontrol-episode')) {
+        const statusEpisode = document.createElement('p');
+        statusEpisode.id = 'status-episode-aktif';
+        statusEpisode.style.cssText = 'color: #c5b3f7; font-weight: bold; margin: 10px 0; font-size: 16px;';
+        document.getElementById('btn-bookmark').insertAdjacentElement('afterend', statusEpisode);
+
+        const wadahKontrol = document.createElement('div');
+        wadahKontrol.id = 'wadah-kontrol-episode';
+        wadahKontrol.style.marginTop = '20px';
+        wadahKontrol.innerHTML = `<h3>Daftar Episode:</h3><div id="grid-episode" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>`;
+        infoFilmDiv.appendChild(wadahKontrol);
+    }
+
+    const gridEpisode = document.getElementById('grid-episode');
+    gridEpisode.innerHTML = "";
+    statusPutar.season = 1;
+    statusPutar.episode = 1;
+    document.getElementById('status-episode-aktif').innerText = `Sedang Diputar: S1 Eps 1`;
+
+    perbaruiTombolMarathon();
+    catatKeHistory(1, 1);
+    muatPemutarVideo();
+
+    daftarEpisodeAktif.forEach((eps, index) => {
+        const tombol = document.createElement('button');
+        tombol.innerText = `Eps ${eps.episode_number}`;
+        tombol.className = 'tombol-eps';
+        tombol.setAttribute('data-eps', eps.episode_number);
+
+        const isPertama = index === 0;
+        tombol.style.cssText = `padding: 8px 15px; background-color: ${isPertama ? '#a88beb' : '#241e33'}; color: ${isPertama ? '#121018' : 'white'}; font-weight: ${isPertama ? 'bold' : 'normal'}; border: none; border-radius: 5px; cursor: pointer; transition: 0.2s;`;
+
+        tombol.onclick = () => pilihDanPutarEpisode(eps.episode_number);
+        gridEpisode.appendChild(tombol);
+    });
 }
