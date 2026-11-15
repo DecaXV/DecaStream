@@ -1,0 +1,22 @@
+{
+  "name": "DecaStream - Tokusatsu & Anime",
+  "short_name": "DecaStream",
+  "description": "Platform streaming Tokusatsu dan Anime",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#121018",
+  "theme_color": "#a88beb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3163/3163478.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3163/3163478.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

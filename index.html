@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#a88beb">
+    <title>DecaStream - Streaming Tokusatsu & Anime</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Menu Navigasi Atas -->
+    <nav class="navbar">
+        <h1 class="logo" onclick="kembaliKeBeranda()">DECASTREAM</h1>
+        <ul class="menu">
+            <li onclick="tampilkanHistory()">History</li>
+            <li onclick="tampilkanBookmark()">Bookmark</li>
+            <li><a href="https://trakteer.id/decaxv/tip" target="_blank" rel="noopener noreferrer">Trakteer</a></li>
+            <li onclick="instalAplikasiHP()">Install App</li>
+        </ul>
+    </nav>
+
+    <!-- Banner Instalasi Aplikasi (Muncul otomatis di HP/Browser yang mendukung) -->
+    <div id="banner-install" class="banner-install" style="display: none;">
+        <span>📱 Pasang <strong>DecaStream</strong> di layar utama HP untuk pengalaman lebih cepat!</span>
+        <button onclick="instalAplikasiHP()">Install Sekarang</button>
+    </div>
+
+    <!-- Bagian Konten Utama -->
+    <main>
+        <section id="bagian-new-release" style="margin-bottom: 40px;">
+            <h2 class="judul-seksi">🔥 New Release</h2>
+            <div class="grid-katalog" id="tempat-new-release"></div>
+        </section>
+
+        <h2 id="judul-halaman">Katalog Series</h2>
+        
+        <div class="filter-kategori" id="wadah-filter">
+            <button class="aktif" onclick="saringFilm('Semua', this)">Semua</button>
+            <button onclick="saringFilm('Kamen Rider', this)">Kamen Rider</button>
+            <button onclick="saringFilm('Ultraman', this)">Ultraman</button>
+            <button onclick="saringFilm('Super Sentai', this)">Super Sentai</button>
+            <button onclick="saringFilm('Power Rangers', this)">Power Rangers</button>
+            <button onclick="saringFilm('Other', this)">Other</button>
+            <button onclick="saringFilm('Anime', this)">Anime</button>
+        </div>
+
+        <div class="grid-katalog" id="tempat-katalog-js"></div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

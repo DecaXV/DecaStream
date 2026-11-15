@@ -1,0 +1,286 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #121018;
+    color: #f3effa;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1a1625;
+    padding: 15px 30px;
+    border-bottom: 1px solid #2e2740;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 800;
+    color: #b79ced;
+    letter-spacing: 1.2px;
+    cursor: pointer;
+}
+
+.logo a {
+    color: #b79ced;
+    text-decoration: none;
+}
+
+.menu {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.menu li,
+.menu li a {
+    cursor: pointer;
+    font-size: 14px;
+    color: #e2dcf0;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.menu li:hover,
+.menu li a:hover {
+    color: #c5b3f7;
+}
+
+/* Banner Install HP */
+.banner-install {
+    background-color: #241e33;
+    border-bottom: 1px solid #a88beb;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.banner-install button {
+    background-color: #a88beb;
+    color: #121018;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Konten Utama */
+main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 25px 30px;
+}
+
+.judul-seksi {
+    color: #c5b3f7;
+}
+
+/* Tombol Filter Kategori */
+.filter-kategori {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.filter-kategori button {
+    background-color: #241e33;
+    color: #e8e2f5;
+    border: 1px solid #382f4f;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.25s ease;
+}
+
+.filter-kategori button:hover,
+.filter-kategori button.aktif {
+    background-color: #a88beb;
+    color: #121018;
+    border-color: #a88beb;
+    font-weight: bold;
+}
+
+/* Grid Katalog */
+.grid-katalog {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+/* Kartu Film & Efek Hover */
+.kartu-film {
+    background-color: #1b1726;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    border: 1px solid #29223a;
+    min-width: 0;
+}
+
+.kartu-film:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 22px rgba(168, 139, 235, 0.25);
+    border-color: #a88beb;
+}
+
+.gambar-poster {
+    width: 100%;
+    height: 265px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    display: block;
+    background-color: #262036;
+}
+
+.tahun {
+    font-size: 12px;
+    color: #c5b3f7;
+    font-weight: bold;
+}
+
+.kartu-film h3 {
+    font-size: 14px;
+    margin: 6px 0 2px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+/* Halaman Detail */
+.halaman-detail {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 25px;
+}
+
+.pemutar-video {
+    width: 100%;
+    min-height: 420px;
+    background-color: #09080d;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #2e2740;
+}
+
+.pemutar-video iframe {
+    width: 100%;
+    height: 450px;
+    border: none;
+    display: block;
+}
+
+/* Bar Navigasi Marathon (Prev / Next Episode) */
+.bar-marathon {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-marathon {
+    padding: 9px 18px;
+    background-color: #241e33;
+    color: #f3effa;
+    border: 1px solid #a88beb;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-marathon:hover:not(:disabled) {
+    background-color: #a88beb;
+    color: #121018;
+}
+
+.btn-marathon:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: #382f4f;
+}
+
+.info-film {
+    margin-top: 20px;
+    background-color: #1b1726;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #29223a;
+}
+
+.teks-kategori {
+    color: #c5b3f7;
+    font-weight: 600;
+}
+
+/* Responsif Layar HP */
+@media (max-width: 600px) {
+    .navbar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 14px;
+    }
+
+    main {
+        padding: 14px;
+    }
+
+    .grid-katalog {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .gambar-poster {
+        height: 205px;
+    }
+
+    .halaman-detail {
+        padding: 14px;
+    }
+
+    .pemutar-video {
+        min-height: 230px;
+    }
+
+    .pemutar-video iframe {
+        height: 240px;
+    }
+
+    .btn-marathon {
+        flex: 1;
+        text-align: center;
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
